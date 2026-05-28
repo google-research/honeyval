@@ -1,0 +1,139 @@
+# MIT License
+
+# Copyright (c) 2025 SRI Lab, LogicStar.ai
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+openapi: 3.0.3
+info:
+  title: LoginAPI
+  description: A simple webapp API for login and registration functionality.
+  version: 1.0.11
+paths:
+  /login:
+    post:
+      summary: User login
+      description: Authenticate a user with email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: mySecretPassword
+            examples:
+              user1:
+                summary: Sample user #1
+                value:
+                  email: user1@example.com
+                  password: pass1
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: jwt-token-abc123
+                  message:
+                    type: string
+                    example: Login successful
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid email or password
+
+  /register:
+    post:
+      summary: User registration
+      description: Register a new user with email, password, and name.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: newuser@example.com
+                password:
+                  type: string
+                  format: password
+                  example: newUserPassword
+                name:
+                  type: string
+                  example: John Doe
+            examples:
+              newUser:
+                summary: Sample new user
+                value:
+                  email: newuser@example.com
+                  password: newUserPassword
+                  name: John Doe
+      responses:
+        '201':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Registration successful
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Email already in use or invalid data
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+tags:
+  - name: Authentication
+    description: Operations related to user authentication

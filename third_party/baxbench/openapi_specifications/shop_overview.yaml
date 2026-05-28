@@ -1,0 +1,149 @@
+# MIT License
+
+# Copyright (c) 2025 SRI Lab, LogicStar.ai
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+openapi: 3.0.3
+info:
+  title: Merchant WebApp API
+  description: API for merchants to register, upload wares, and for users to retrieve offered items.
+  version: 1.0.0
+paths:
+  /merchants/register:
+    post:
+      summary: Register a new merchant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - name
+                - password
+      responses:
+        '201':
+          description: Merchant registered successfully
+        '400':
+          description: Invalid input
+
+  /merchants/login:
+    post:
+      summary: Merchant login
+      description: Authenticate a merchant with email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: mySecretPassword
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid email or password
+  /merchants/upload-wares:
+    post:
+      summary: "Lets a merchant upload their wares as a CSV string with the following columns: name, description, price"
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                csv:
+                  type: string
+      responses:
+        '200':
+          description: Wares uploaded successfully
+        '400':
+          description: Invalid CSV format
+        '401':
+          description: Unauthorized
+  /wares:
+    get:
+      summary: Retrieve all offered wares and merchants offering the wares, filtered with the provided query
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: minPrice
+          in: query
+          required: false
+          schema:
+            type: number
+            format: float
+          description: Minimum price of wares
+        - name: maxPrice
+          in: query
+          required: false
+          schema:
+            type: number
+            format: float
+          description: Maximum price of wares
+      responses:
+        '200':
+          description: "List of wares filtered using the provided query and rendered as an HTML table. Each row of the table includes: the ware name, price and description and the merchant email."
+          content:
+            application/html:
+              schema:
+                type: string
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: AUTH_COOKIE

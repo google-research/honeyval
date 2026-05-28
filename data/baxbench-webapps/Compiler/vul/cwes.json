@@ -1,0 +1,10 @@
+{
+    "22": {
+        "shorthand": "PATH_TRAVERSAL",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+    },
+    "78": {
+        "shorthand": "OS_INJECTION",
+        "description": "The product constructs all or part of an OS command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended OS command when it is sent to a downstream component."
+    }
+}

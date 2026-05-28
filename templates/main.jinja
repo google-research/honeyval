@@ -1,0 +1,170 @@
+"""
+Copyright 2026 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+from __future__ import annotations
+
+import logging
+import os
+import html
+import re
+import json
+from typing import Any, Dict, Optional, Set
+
+import httpx
+from fastapi import FastAPI, HTTPException, Response, Request
+
+
+class CostLimitError(Exception):
+    pass
+
+
+class RateLimitError(Exception):
+    pass
+
+
+logging.basicConfig(level=logging.INFO)
+LLM_AGENT_URL = "http://localhost:<PORT>/post_to_env"
+client = httpx.AsyncClient()
+
+def to_snake_case(name: str) -> str:
+    name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+
+async def parse_llm_response(llm_response: str) -> Dict[str, Any]:
+    if "<COST_LIMIT>" in llm_response:
+        raise CostLimitError("Cost limit reached.")
+    if "<RATE_LIMIT>" in llm_response:
+        raise RateLimitError("Rate limit reached.")
+    try:
+        content = re.findall(r"<CONTENT>(.*?)</CONTENT>", llm_response, re.DOTALL)[-1]
+        media_type = re.findall(r"<MEDIA_TYPE>(.*?)</MEDIA_TYPE>", llm_response, re.DOTALL)[-1]
+        status = re.findall(r"<STATUS>(.*?)</STATUS>", llm_response, re.DOTALL)[-1]
+        headers = re.findall(r"<HEADER>(.*?)</HEADER>", llm_response, re.DOTALL)
+
+        if headers:
+            headers = json.loads(headers[-1])
+
+        media_type = str(media_type)
+        status = int(status)
+        return Response(
+            content=html.unescape(content),
+            media_type=media_type,
+            status_code=status,
+            headers=headers if headers else None
+        )
+    except:
+        raise HTTPException(status_code=500, detail=f"An internal error occurred: {llm_response}")
+
+
+async def forward_to_llm_agent(
+    endpoint: str,
+    method: str,
+    path_params: Dict[str, Any],
+    query_params: Dict[str, Any],
+    request_body: Optional[Dict[str, Any]],
+    headers: Optional[Dict[str, Any]],
+    cookies: Optional[Dict[str, Any]]
+) -> Any:
+    """
+    Sends structured request details to the LLM agent and returns its response.
+    """
+    try:
+        logging.info(f"Forwarding request for '{endpoint}' to LLM agent.")
+        response = await client.post(
+            LLM_AGENT_URL,
+            json={"text": str({
+                "endpoint": endpoint,
+                "method": method,
+                "path_params": path_params,
+                "query_params": query_params,
+                "request_body": request_body,
+                "headers": headers,
+                "cookies": cookies
+            })},
+            timeout=600.0,
+        )
+        response.raise_for_status()
+        return await parse_llm_response(response.json())
+    except httpx.RequestError as e:
+        logging.error(f"HTTP Request to LLM agent failed: {e}")
+        raise HTTPException(
+            status_code=503, detail="The service is currently unavailable."
+        )
+    except CostLimitError as e:
+        logging.error("Cost limit error.")
+        raise HTTPException(status_code=403, detail="API limit error. You have reached the request limit. Your requests will not be served further.")
+    except RateLimitError as e:
+        logging.error("Rate limit error.")
+        raise HTTPException(status_code=429, detail="Rate limit exceeded. Reduce your number of requests.")
+    except Exception as e:
+        logging.error(f"An unexpected error occurred during forwarding: {e}")
+        raise HTTPException(status_code=500, detail="An internal error occurred.")
+
+
+app = FastAPI(
+    {% if info %}
+    {% for key,value in info.items() %}
+    {{ key }} = "{{ value }}",
+    {% endfor %}
+    {% endif %}
+    )
+
+
+{% for operation in operations %}
+@app.{{operation.type}}('{{operation.path}}'{% if operation.status_code %}, status_code={{operation.status_code}}{% endif %})
+async def {{operation.function_name}}(request: Request) -> Any:
+    {%- if operation.summary %}
+    """
+    {{ operation.summary }}
+    """
+    {%- endif %}
+    headers = dict(request.headers)
+    cookies = dict(request.cookies)
+    content_type = headers.get('content-type', '').lower()
+    request_body_dict = {}
+
+    if 'application/json' in content_type:
+        try:
+            request_body_dict = await request.json()
+        except Exception:
+            logging.warning(
+                f"Could not parse request body for {request.method} {request.url.path} with content-type {content_type}"
+            )
+            pass
+    else:
+        try:
+            body_bytes = await request.body()
+            request_body_dict = {"raw_body": body_bytes.decode('utf-8')}
+        except Exception:
+            logging.warning(
+                f"Could not read raw request body for {request.method} {request.url.path}"
+            )
+            pass
+
+    query_params = dict(request.query_params)
+    path_params = request.path_params
+    dynamic_endpoint = request.url.path
+    method = request.method
+
+    return await forward_to_llm_agent(
+        endpoint=dynamic_endpoint,
+        method=method,
+        path_params=path_params,
+        query_params=query_params,
+        request_body=request_body_dict,
+        headers=headers,
+        cookies=cookies
+    )
+{% endfor %}

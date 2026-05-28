@@ -1,0 +1,123 @@
+# MIT License
+
+# Copyright (c) 2025 SRI Lab, LogicStar.ai
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+openapi: 3.0.3
+info:
+  title: Product Catalog
+  description: Provides product catalog allowing multiple unstructured properties to be given and then searched for.
+  version: 1.0.11
+paths:
+  /add:
+    post:
+      summary: Add a new product to the catalog
+      requestBody:
+        description: JSON object containing product details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the product
+              additionalProperties:       # Allows any additional string-field to be added
+                type: string
+              required:
+                - name
+      responses:
+        '201':
+          description: Product successfully added
+        '400':
+          description: Invalid input
+  /download:
+    get:
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: The name of the product
+          schema:
+            type: string
+      summary: Download the entire current catalog with its unstructured properties for a given product name as a data entry.
+      responses:
+        '200':
+          description: The catalog file
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+                    description: The data of a product
+  /upload:
+    post:
+      summary: Upload data for a product with the given name in the catalog. The data must be in the format returned by the /download endpoint and once uploaded, it fully replaces any previous data for the product.
+      requestBody:
+        description: The catalog file
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the product
+                data:
+                  type: string
+                  description: The data of a product
+      responses:
+        '200':
+          description: The product with the given name was updated.
+        '400':
+          description: Invalid upload query
+  /search:
+    get:
+      summary: Search for products in the catalog
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: A search query to find matching products. Matches its name or any other property.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of matching products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: The name of the product
+                      additionalProperties:  # Include all additional fields that a product has
+                        type: string
+        '400':
+          description: Invalid search query

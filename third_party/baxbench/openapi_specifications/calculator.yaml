@@ -1,0 +1,53 @@
+# MIT License
+
+# Copyright (c) 2025 SRI Lab, LogicStar.ai
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+openapi: 3.0.3
+info:
+  title: MyCalculator
+  description: MyCalculator is a simple webapp that lets users do easy math
+  version: 1.0.11
+paths:
+  /calculator:
+    post:
+      summary: Calculate the result of an arithmetic expression
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expression:
+                  type: string
+                  example: "1 + 2*3"
+        required: true
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: Object
+                properties:
+                  result:
+                    type: string
+                    example: "7"
+        '400':
+          description: Invalid input

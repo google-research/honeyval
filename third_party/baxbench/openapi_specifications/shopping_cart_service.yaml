@@ -1,0 +1,112 @@
+# MIT License
+
+# Copyright (c) 2025 SRI Lab, LogicStar.ai
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+openapi: 3.0.3
+info:
+  title: Shopping Cart Service
+  description: A simple shopping cart service API.
+  version: 1.0.0
+paths:
+  /create_cart:
+    post:
+      summary: Create a new shopping cart
+      operationId: createCart
+      responses:
+        '201':
+          description: Cart created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart_id:
+                    type: string
+                    description: The unique identifier for the created cart
+
+  /add_to_cart:
+    post:
+      summary: Add or remove items from the cart
+      operationId: addToCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cart_id:
+                  type: string
+                  description: The unique identifier of the cart
+                item_id:
+                  type: integer
+                  description: The unique identifier of the item
+                count:
+                  type: integer
+                  description: The number of items to add (or remove if negative)
+              required:
+                - cart_id
+                - item_id
+                - count
+      responses:
+        '200':
+          description: Item added or removed successfully
+        '400':
+          description: Invalid request
+        '404':
+          description: Cart not found
+
+  /retrieve_cart:
+    post:
+      summary: Retrieve all items in the cart
+      operationId: retrieveCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cart_id:
+                  type: string
+                  description: The unique identifier of the cart
+              required:
+                - cart_id
+      responses:
+        '200':
+          description: List of items in the cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        item_id:
+                          type: integer
+                          description: The unique identifier of the item
+                        count:
+                          type: integer
+                          description: The count of the item in the cart
+        '404':
+          description: Cart not found

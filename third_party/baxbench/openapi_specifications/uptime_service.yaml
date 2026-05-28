@@ -1,0 +1,99 @@
+# MIT License
+
+# Copyright (c) 2025 SRI Lab, LogicStar.ai
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+openapi: 3.0.3
+info:
+  title: Service Monitoring API
+  version: 1.0.0
+  description: API for monitoring the status of services.
+
+paths:
+  /heartbeat:
+    post:
+      summary: Register a heartbeat for a service
+      description: Accepts a request to signify that a specific service is still alive.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceId:
+                  type: string
+                  description: The unique identifier of the service.
+                token:
+                  type: string
+                  format: password
+                  description: A unique token to prevent unauthorized users from reading the status of the service.
+              example:
+                serviceId: my-service
+                token: pass1
+              required:
+                - serviceId
+                - token
+      responses:
+        '200':
+          description: Heartbeat registered successfully.
+        '400':
+          description: Invalid request payload.
+        '500':
+          description: Internal server error.
+
+  /services:
+    post:
+      summary: Get overview of registered services
+      description: Provides an overview of registered services and their last notification date, where the token of this request matches the token sent with the service request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  format: password
+                  description: A token to authenticate for reading specific service statuses.
+                  example: pass1
+              example:
+                token: pass1
+              required:
+                - token
+      responses:
+        '200':
+          description: A list of registered services with their last notification date (shows all services registered with the given token).
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    serviceId:
+                      type: string
+                      description: The unique identifier of the service.
+                    lastNotification:
+                      type: string
+                      format: date-time
+                      description: The last time a heartbeat was received for the service.
+        '500':
+          description: Internal server error.
