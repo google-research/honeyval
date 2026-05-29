@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: "If you use Honeyval in your work, please cite our paper."
+type: article
+title: "Honeyval: A Comprehensive Evaluation Framework for LLM-powered HTTP Honeypots"
+authors:
+  - family-names: "Vero"
+    given-names: "Mark"
+  - family-names: "Kaczmarczyck"
+    given-names: "Fabian"
+  - family-names: "Petrov"
+    given-names: "Ivan"
+  - family-names: "Shumailov"
+    given-names: "Ilia"
+  - family-names: "Hayes"
+    given-names: "Jamie"
+  - family-names: "Heinen"
+    given-names: "Niels"
+  - family-names: "Fan"
+    given-names: "Tianqi"
+  - family-names: "Invernizzi"
+    given-names: "Luca"
+  - family-names: "Vechev"
+    given-names: "Martin"
+license: Apache 2.0
+repository-code: "https://github.com/google-research/honeyval"
+url: "https://honeyval.xyz/"
+preferred-citation:
+  type: article
+  title: "Honeyval: A Comprehensive Evaluation Framework for LLM-powered HTTP Honeypots"
+  authors:
+    - family-names: "Vero"
+      given-names: "Mark"
+    - family-names: "Kaczmarczyck"
+      given-names: "Fabian"
+    - family-names: "Petrov"
+      given-names: "Ivan"
+    - family-names: "Shumailov"
+      given-names: "Ilia"
+    - family-names: "Hayes"
+      given-names: "Jamie"
+    - family-names: "Heinen"
+      given-names: "Niels"
+    - family-names: "Fan"
+      given-names: "Tianqi"
+    - family-names: "Invernizzi"
+      given-names: "Luca"
+    - family-names: "Vechev"
+      given-names: "Martin"
+  year: 2026
+  identifiers:
+    - type: other
+      value: "arXiv:2605.29963"
+  url: "https://arxiv.org/abs/2605.29963"

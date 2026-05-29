@@ -13,7 +13,7 @@
 
 ## 👋 Overview
 
-This is the source code for the Honeyval evaluation framework. The goal of the framework is to provide a systematic evaluation environment for LLM-powered HTTP honeypots. For more details, please read our [paper](TBD).
+This is the source code for the Honeyval evaluation framework. The goal of the framework is to provide a systematic evaluation environment for LLM-powered HTTP honeypots. For more details, please read our [paper](https://arxiv.org/abs/2605.29963).
 
 🌍 **Website & Leaderboard:** https://honeyval.xyz/
 
@@ -143,6 +143,22 @@ with `pip install pre-commit`. Then install the hooks:
 
 ```bash
 pre-commit install
+```
+
+## How to cite
+
+If you use Honeyval in your work, please cite our paper:
+
+```bibtex
+@misc{vero2026honeyvalcomprehensiveevaluationframework,
+      title={Honeyval: A Comprehensive Evaluation Framework for LLM-powered HTTP Honeypots}, 
+      author={Mark Vero and Fabian Kaczmarczyck and Ivan Petrov and Ilia Shumailov and Jamie Hayes and Niels Heinen and Tianqi Fan and Luca Invernizzi and Martin Vechev},
+      year={2026},
+      eprint={2605.29963},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2605.29963}, 
+}
 ```
 
 ## License
